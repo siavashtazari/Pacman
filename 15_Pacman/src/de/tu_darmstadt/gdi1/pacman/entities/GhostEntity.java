@@ -19,7 +19,7 @@ public class GhostEntity extends Entity {
 	private final static int WEST = 3;
 	private int speed;
 	private float distancePerTick;
-
+// ...
 	public GhostEntity(String entityID) {
 		super(entityID);
 		this.orientation = NORTH;
