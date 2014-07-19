@@ -15,6 +15,7 @@ import org.newdawn.slick.state.StateBasedGame;
 
 import de.tu_darmstadt.gdi1.pacman.entities.GhostEntity;
 import de.tu_darmstadt.gdi1.pacman.entities.PacmanEntity;
+import de.tu_darmstadt.gdi1.pacman.parser.Level;
 import eea.engine.action.basicactions.ChangeStateAction;
 import eea.engine.component.render.ImageRenderComponent;
 import eea.engine.entity.Entity;
@@ -26,6 +27,7 @@ public class GameplayState extends BasicGameState {
 	protected int stateID;
 	protected StateBasedEntityManager entityManager;
 	protected static Random random = new Random();
+	protected Level level;
 
 	public final static char[][] STANDARD_GAME_FIELD = {
 			{ 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X' },
@@ -34,11 +36,16 @@ public class GameplayState extends BasicGameState {
 			{ 'X', ' ', 'X', 'G', 'G', 'G', 'X', ' ', 'X' },
 			{ 'X', ' ', 'X', 'X', 'X', 'X', 'X', ' ', 'X' },
 			{ 'X', ' ', ' ', ' ', 'P', ' ', ' ', ' ', 'X' },
-			{ 'X', ' ', 'X', 'X', 'X', 'X', 'X', ' ', 'X' },
+			{ 'X', ' ', 'X', 'X', ' ', 'X', 'X', ' ', 'X' },
 			{ 'X', 'U', ' ', ' ', 'X', ' ', ' ', 'U', 'X' },
 			{ 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X' } };
+	public final static char[][] LEVEL_MATRIX = new Level("res/levels/Extended 3.txt").getLevel();
 	public final static int SQUARE_SIZE = 35;
 	public final static float STARTING_POINT = SQUARE_SIZE / 2.0f;
+	public final static int FIELD_SIZE_X = SQUARE_SIZE
+			* LEVEL_MATRIX[0].length;
+	public final static int FIELD_SIZE_Y = SQUARE_SIZE
+			* LEVEL_MATRIX.length;
 	protected Entity[][] field;
 	protected Vector<Entity> pacmanSpawners;
 	protected Vector<Entity> ghostSpawners;
@@ -76,19 +83,18 @@ public class GameplayState extends BasicGameState {
 		// create static (non-moving) environment, reading game from matrix
 		// standardGameField
 		int menubar = 0;
-		((AppGameContainer) container).setDisplayMode(SQUARE_SIZE
-				* STANDARD_GAME_FIELD[0].length, SQUARE_SIZE
-				* STANDARD_GAME_FIELD.length + menubar, false);
-		for (int i = 0; i < STANDARD_GAME_FIELD.length; i++) {
-			for (int j = 0; j < STANDARD_GAME_FIELD[i].length; j++) {
+		((AppGameContainer) container).setDisplayMode(FIELD_SIZE_X, FIELD_SIZE_Y
+				+ menubar, false);
+		for (int i = 0; i < LEVEL_MATRIX.length; i++) {
+			for (int j = 0; j < LEVEL_MATRIX[i].length; j++) {
 				Entity element = new Entity("element "
-						+ (i * STANDARD_GAME_FIELD[i].length + j));
+						+ (i * LEVEL_MATRIX[i].length + j));
 				element.setPosition(new Vector2f(SQUARE_SIZE * j
 						+ STARTING_POINT, SQUARE_SIZE * i + STARTING_POINT
 						+ menubar));
 
 				String picDir;
-				switch (STANDARD_GAME_FIELD[i][j]) {
+				switch (LEVEL_MATRIX[i][j]) {
 				case 'X':
 					picDir = "res/pictures/theme1/map/X15.png";
 					break;
@@ -105,6 +111,12 @@ public class GameplayState extends BasicGameState {
 				case 'P':
 					pacmanSpawners.add(element);
 					picDir = "res/pictures/theme1/map/B.png";
+					break;
+				case 'T':
+					picDir = "res/pictures/theme1/entities/teleporter.png";
+					break;
+				case 'S':
+					picDir = "res/pictures/theme1/entities/speedup.png";
 					break;
 				default:
 					System.err.println("character not recognized");

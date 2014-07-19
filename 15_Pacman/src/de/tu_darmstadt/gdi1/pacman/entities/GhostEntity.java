@@ -32,6 +32,7 @@ public class GhostEntity extends Entity {
 		if (isAtSquareCenter(delta)) {
 			changeOrientation();
 		}
+		System.out.println(delta);
 		move(delta);
 	}
 
@@ -44,10 +45,10 @@ public class GhostEntity extends Entity {
 				% GameplayState.SQUARE_SIZE;
 		float distanceYToCrossing = (y - GameplayState.STARTING_POINT)
 				% GameplayState.SQUARE_SIZE;
-		return (distanceXToCrossing < distancePerTick * delta / 2 || distanceXToCrossing > GameplayState.SQUARE_SIZE
-				- distancePerTick * delta / 2)
-				&& (distanceYToCrossing < distancePerTick * delta / 2 || distanceYToCrossing > GameplayState.SQUARE_SIZE
-						- distancePerTick * delta / 2);
+		return (distanceXToCrossing < distancePerTick * delta / 2.0 || distanceXToCrossing > GameplayState.SQUARE_SIZE
+				- distancePerTick * delta / 2.0)
+				&& (distanceYToCrossing < distancePerTick * delta / 2.0 || distanceYToCrossing > GameplayState.SQUARE_SIZE
+						- distancePerTick * delta / 2.0);
 	}
 
 	private void changeOrientation() {
@@ -66,23 +67,23 @@ public class GhostEntity extends Entity {
 		int x = getInternalPosition().x;
 		int y = getInternalPosition().y;
 		char[] adjacent = new char[4];
-		if (x > 0) {
-			adjacent[NORTH] = GameplayState.STANDARD_GAME_FIELD[y - 1][x];
+		if (y > 0) {
+			adjacent[NORTH] = GameplayState.LEVEL_MATRIX[y - 1][x];
 		} else {
 			adjacent[NORTH] = 'X';
 		}
-		if (y < GameplayState.STANDARD_GAME_FIELD[0].length - 1) {
-			adjacent[EAST] = GameplayState.STANDARD_GAME_FIELD[y][x + 1];
+		if (x < GameplayState.LEVEL_MATRIX[0].length - 1) {
+			adjacent[EAST] = GameplayState.LEVEL_MATRIX[y][x + 1];
 		} else {
 			adjacent[EAST] = 'X';
 		}
-		if (x < GameplayState.STANDARD_GAME_FIELD.length - 1) {
-			adjacent[SOUTH] = GameplayState.STANDARD_GAME_FIELD[y + 1][x];
+		if (y < GameplayState.LEVEL_MATRIX.length - 1) {
+			adjacent[SOUTH] = GameplayState.LEVEL_MATRIX[y + 1][x];
 		} else {
 			adjacent[SOUTH] = 'X';
 		}
-		if (y > 0) {
-			adjacent[WEST] = GameplayState.STANDARD_GAME_FIELD[y][x - 1];
+		if (x > 0) {
+			adjacent[WEST] = GameplayState.LEVEL_MATRIX[y][x - 1];
 		} else {
 			adjacent[WEST] = 'X';
 		}
