@@ -18,48 +18,45 @@ public class GhostEntity extends Entity {
 	private final static int SOUTH = 2;
 	private final static int WEST = 3;
 	private int speed;
-	private float distancePerTick;
 
 	public GhostEntity(String entityID) {
 		super(entityID);
 		this.orientation = NORTH;
-		this.speed = 2;
-		this.distancePerTick = GameplayState.SQUARE_SIZE * this.speed / 1000.0f;
+		this.speed = 3;
 	}
 
 	@Override
 	public void update(GameContainer gc, StateBasedGame game, int delta) {
-		if (isAtSquareCenter(delta)) {
+		if (isAtSquareCenter()) {
 			changeOrientation();
+			// System.out.println("orientation changed");
 		}
-		System.out.println(delta);
+		// System.out.println(delta);
+		// refresh rate is 60 Hz (delta = 16-17 ms)
 		move(delta);
 	}
 
-	private boolean isAtSquareCenter(int delta) {
+	private boolean isAtSquareCenter() {
 		float x = getPosition().getX();
 		float y = getPosition().getY();
-		// with refresh rate of 60 Hz (delta of 17 ms), movement per update is
-		// about 0.6*speed pixels
-		float distanceXToCrossing = (x - GameplayState.STARTING_POINT)
+		int distanceXToCrossing = ((int) (x - GameplayState.STARTING_POINT))
 				% GameplayState.SQUARE_SIZE;
-		float distanceYToCrossing = (y - GameplayState.STARTING_POINT)
+		int distanceYToCrossing = ((int) (y - GameplayState.STARTING_POINT))
 				% GameplayState.SQUARE_SIZE;
-		return (distanceXToCrossing < distancePerTick * delta / 2.0 || distanceXToCrossing > GameplayState.SQUARE_SIZE
-				- distancePerTick * delta / 2.0)
-				&& (distanceYToCrossing < distancePerTick * delta / 2.0 || distanceYToCrossing > GameplayState.SQUARE_SIZE
-						- distancePerTick * delta / 2.0);
+		return (distanceXToCrossing <= speed / 2.0 || distanceXToCrossing > GameplayState.SQUARE_SIZE
+				- speed / 2.0)
+				&& (distanceYToCrossing <= speed / 2.0 || distanceYToCrossing > GameplayState.SQUARE_SIZE
+						- speed / 2.0);
 	}
 
 	private void changeOrientation() {
 		Vector<Integer> ways = getPossibleWays();
-		if (ways.size() == 0) { // has to turn around
-			orientation = (orientation + 2) % 4;
-		} else { // randomly choose direction
+		if (ways.size() == 0) {
+			orientation = (orientation + 2) % 4; // has to turn around
+		} else {
 			orientation = ways.get(GameplayState.getRandom().nextInt(
-					ways.size()));
+					ways.size())); // randomly choose direction
 		}
-		// orientation = (orientation + 1) % 4;
 	}
 
 	private Vector<Integer> getPossibleWays() {
@@ -96,24 +93,22 @@ public class GhostEntity extends Entity {
 	}
 
 	public void move(int delta) {
-		float xFactor, yFactor;
+		float xDelta, yDelta;
 		if (orientation == NORTH) {
-			xFactor = 0;
-			yFactor = -1;
+			xDelta = 0;
+			yDelta = -1;
 		} else if (orientation == EAST) {
-			xFactor = 1;
-			yFactor = 0;
+			xDelta = 1;
+			yDelta = 0;
 		} else if (orientation == SOUTH) {
-			xFactor = 0;
-			yFactor = 1;
+			xDelta = 0;
+			yDelta = 1;
 		} else {
-			xFactor = -1;
-			yFactor = 0;
+			xDelta = -1;
+			yDelta = 0;
 		}
-
-		setPosition(new Vector2f(getPosition().getX() + xFactor
-				* distancePerTick * delta, getPosition().getY() + yFactor
-				* distancePerTick * delta));
+		setPosition(new Vector2f(getPosition().getX() + xDelta * speed,
+				getPosition().getY() + yDelta * speed));
 	}
 
 	public Point getInternalPosition() {

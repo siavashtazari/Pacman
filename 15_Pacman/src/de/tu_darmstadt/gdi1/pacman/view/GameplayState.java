@@ -58,7 +58,7 @@ public class GameplayState extends BasicGameState {
 		entityManager = StateBasedEntityManager.getInstance();
 		pacmanSpawners = new Vector<Entity>(4, 4);
 		ghostSpawners = new Vector<Entity>(4, 4);
-		ghostCnt = 4;
+		ghostCnt = 1;
 		ghosts = new GhostEntity[ghostCnt];
 	}
 
