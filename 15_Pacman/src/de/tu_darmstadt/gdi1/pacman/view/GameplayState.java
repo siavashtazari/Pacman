@@ -35,12 +35,10 @@ public class GameplayState extends BasicGameState {
 			{ 'X', ' ', 'X', 'X', 'X', 'X', 'X', ' ', 'X' },
 			{ 'X', ' ', ' ', ' ', 'P', ' ', ' ', ' ', 'X' },
 			{ 'X', ' ', 'X', 'X', 'X', 'X', 'X', ' ', 'X' },
-			{ 'X', 'U', ' ', ' ', ' ', ' ', ' ', 'U', 'X' },
+			{ 'X', 'U', ' ', ' ', 'X', ' ', ' ', 'U', 'X' },
 			{ 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X' } };
 	public final static int SQUARE_SIZE = 35;
 	public final static float STARTING_POINT = SQUARE_SIZE / 2.0f;
-	public final static int FIELD_SIZE = SQUARE_SIZE
-			* STANDARD_GAME_FIELD.length;
 	protected Entity[][] field;
 	protected Vector<Entity> pacmanSpawners;
 	protected Vector<Entity> ghostSpawners;
@@ -78,8 +76,9 @@ public class GameplayState extends BasicGameState {
 		// create static (non-moving) environment, reading game from matrix
 		// standardGameField
 		int menubar = 0;
-		((AppGameContainer) container).setDisplayMode(FIELD_SIZE, FIELD_SIZE
-				+ menubar, false);
+		((AppGameContainer) container).setDisplayMode(SQUARE_SIZE
+				* STANDARD_GAME_FIELD[0].length, SQUARE_SIZE
+				* STANDARD_GAME_FIELD.length + menubar, false);
 		for (int i = 0; i < STANDARD_GAME_FIELD.length; i++) {
 			for (int j = 0; j < STANDARD_GAME_FIELD[i].length; j++) {
 				Entity element = new Entity("element "
