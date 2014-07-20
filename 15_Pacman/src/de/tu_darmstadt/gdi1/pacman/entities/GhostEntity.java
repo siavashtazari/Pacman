@@ -22,7 +22,7 @@ public class GhostEntity extends Entity {
 	public GhostEntity(String entityID) {
 		super(entityID);
 		this.orientation = NORTH;
-		this.speed = 3;
+		this.speed = 2;
 	}
 
 	@Override
@@ -33,7 +33,7 @@ public class GhostEntity extends Entity {
 		}
 		// System.out.println(delta);
 		// refresh rate is 60 Hz (delta = 16-17 ms)
-		move(delta);
+		move();
 	}
 
 	private boolean isAtSquareCenter() {
@@ -92,8 +92,8 @@ public class GhostEntity extends Entity {
 		return res;
 	}
 
-	public void move(int delta) {
-		float xDelta, yDelta;
+	public void move() {
+		int xDelta, yDelta;
 		if (orientation == NORTH) {
 			xDelta = 0;
 			yDelta = -1;

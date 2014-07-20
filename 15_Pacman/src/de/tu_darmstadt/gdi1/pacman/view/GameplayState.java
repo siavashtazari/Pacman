@@ -15,11 +15,19 @@ import org.newdawn.slick.state.StateBasedGame;
 
 import de.tu_darmstadt.gdi1.pacman.entities.GhostEntity;
 import de.tu_darmstadt.gdi1.pacman.entities.PacmanEntity;
-import de.tu_darmstadt.gdi1.pacman.parser.Level;
+import de.tu_darmstadt.gdi1.pacman.events.NotInSquareDownEvent;
+import de.tu_darmstadt.gdi1.pacman.events.NotInSquareLeftEvent;
+import de.tu_darmstadt.gdi1.pacman.events.NotInSquareRightEvent;
+import de.tu_darmstadt.gdi1.pacman.events.NotInSquareUpEvent;
+import de.tu_darmstadt.gdi1.pacman.model.Level;
+import eea.engine.action.Action;
 import eea.engine.action.basicactions.ChangeStateAction;
+import eea.engine.component.Component;
 import eea.engine.component.render.ImageRenderComponent;
 import eea.engine.entity.Entity;
 import eea.engine.entity.StateBasedEntityManager;
+import eea.engine.event.OREvent;
+import eea.engine.event.basicevents.KeyDownEvent;
 import eea.engine.event.basicevents.KeyPressedEvent;
 
 public class GameplayState extends BasicGameState {
@@ -39,13 +47,12 @@ public class GameplayState extends BasicGameState {
 			{ 'X', ' ', 'X', 'X', ' ', 'X', 'X', ' ', 'X' },
 			{ 'X', 'U', ' ', ' ', 'X', ' ', ' ', 'U', 'X' },
 			{ 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X' } };
-	public final static char[][] LEVEL_MATRIX = new Level("res/levels/Extended 3.txt").getLevel();
+	public final static char[][] LEVEL_MATRIX = new Level(
+			"res/levels/Extended 3.txt").getLevel();
 	public final static int SQUARE_SIZE = 35;
 	public final static float STARTING_POINT = SQUARE_SIZE / 2.0f;
-	public final static int FIELD_SIZE_X = SQUARE_SIZE
-			* LEVEL_MATRIX[0].length;
-	public final static int FIELD_SIZE_Y = SQUARE_SIZE
-			* LEVEL_MATRIX.length;
+	public final static int FIELD_SIZE_X = SQUARE_SIZE * LEVEL_MATRIX[0].length;
+	public final static int FIELD_SIZE_Y = SQUARE_SIZE * LEVEL_MATRIX.length;
 	protected Entity[][] field;
 	protected Vector<Entity> pacmanSpawners;
 	protected Vector<Entity> ghostSpawners;
@@ -58,7 +65,7 @@ public class GameplayState extends BasicGameState {
 		entityManager = StateBasedEntityManager.getInstance();
 		pacmanSpawners = new Vector<Entity>(4, 4);
 		ghostSpawners = new Vector<Entity>(4, 4);
-		ghostCnt = 1;
+		ghostCnt = 4;
 		ghosts = new GhostEntity[ghostCnt];
 	}
 
@@ -66,25 +73,18 @@ public class GameplayState extends BasicGameState {
 	public void init(GameContainer container, StateBasedGame game)
 			throws SlickException {
 
-		// background
-		// Entity background = new Entity("background");
-		// background.setPosition(new Vector2f(400, 300));
-		// background.addComponent(new ImageRenderComponent(new Image(
-		// "res/pictures/theme1/menu/background.jpg")));
-		// StateBasedEntityManager.getInstance().addEntity(stateID, background);
-
 		// escape button listener
-		Entity esc_Listener = new Entity("ESC_Listener");
-		KeyPressedEvent esc_pressed = new KeyPressedEvent(Input.KEY_ESCAPE);
-		esc_pressed.addAction(new ChangeStateAction(Pacman.MAINMENU_STATE));
-		esc_Listener.addComponent(esc_pressed);
-		entityManager.addEntity(stateID, esc_Listener);
+		Entity escListener = new Entity("ESCListener");
+		KeyPressedEvent escPressed = new KeyPressedEvent(Input.KEY_ESCAPE);
+		escPressed.addAction(new ChangeStateAction(Pacman.MAINMENU_STATE));
+		escListener.addComponent(escPressed);
+		entityManager.addEntity(stateID, escListener);
 
 		// create static (non-moving) environment, reading game from matrix
-		// standardGameField
+		// LEVEL_MATRIX
 		int menubar = 0;
-		((AppGameContainer) container).setDisplayMode(FIELD_SIZE_X, FIELD_SIZE_Y
-				+ menubar, false);
+		((AppGameContainer) container).setDisplayMode(FIELD_SIZE_X,
+				FIELD_SIZE_Y + menubar, false);
 		for (int i = 0; i < LEVEL_MATRIX.length; i++) {
 			for (int j = 0; j < LEVEL_MATRIX[i].length; j++) {
 				Entity element = new Entity("element "
@@ -128,16 +128,8 @@ public class GameplayState extends BasicGameState {
 			}
 		}
 
-		// pacman
-		player = new PacmanEntity("Player");
-		Entity spawn = pacmanSpawners
-				.get(random.nextInt(pacmanSpawners.size()));
-		player.setPosition(spawn.getPosition());
-		player.addComponent(new ImageRenderComponent(new Image(
-				"res/pictures/theme1/entities/P0.png")));
-		StateBasedEntityManager.getInstance().addEntity(stateID, player);
-
 		// ghosts
+		Entity spawn;
 		for (int i = 0; i < ghosts.length; i++) {
 			ghosts[i] = new GhostEntity("Ghost" + i);
 			spawn = ghostSpawners.get(random.nextInt(ghostSpawners.size()));
@@ -146,6 +138,78 @@ public class GameplayState extends BasicGameState {
 					"res/pictures/theme1/entities/G" + i % 4 + ".png")));
 			StateBasedEntityManager.getInstance().addEntity(stateID, ghosts[i]);
 		}
+
+		// pacman
+		player = new PacmanEntity("Player");
+		spawn = pacmanSpawners.get(random.nextInt(pacmanSpawners.size()));
+		player.setPosition(spawn.getPosition());
+		player.addComponent(new ImageRenderComponent(new Image(
+				"res/pictures/theme1/entities/P0.png")));
+		StateBasedEntityManager.getInstance().addEntity(stateID, player);
+
+		// --- Controls ---
+
+		// right arrow key listener
+		Entity rightArrowListener = new Entity("RightListener");
+		OREvent rightArrowPressed = new OREvent(new KeyDownEvent(
+				Input.KEY_RIGHT), new NotInSquareRightEvent(player));
+		rightArrowPressed.addAction(new Action() {
+
+			@Override
+			public void update(GameContainer gc, StateBasedGame sb, int delta,
+					Component event) {
+				player.react(PacmanEntity.EAST);
+			}
+		});
+		rightArrowListener.addComponent(rightArrowPressed);
+		entityManager.addEntity(stateID, rightArrowListener);
+
+		// left arrow key listener
+		Entity leftArrowListener = new Entity("LeftListener");
+		OREvent leftArrowPressed = new OREvent(
+				new KeyDownEvent(Input.KEY_LEFT), new NotInSquareLeftEvent(
+						player));
+		leftArrowPressed.addAction(new Action() {
+
+			@Override
+			public void update(GameContainer gc, StateBasedGame sb, int delta,
+					Component event) {
+				player.react(PacmanEntity.WEST);
+			}
+		});
+		leftArrowListener.addComponent(leftArrowPressed);
+		entityManager.addEntity(stateID, leftArrowListener);
+
+		// up arrow key listener
+		Entity upArrowListener = new Entity("UpListener");
+		OREvent upArrowPressed = new OREvent(new KeyDownEvent(Input.KEY_UP),
+				new NotInSquareUpEvent(player));
+		upArrowPressed.addAction(new Action() {
+
+			@Override
+			public void update(GameContainer gc, StateBasedGame sb, int delta,
+					Component event) {
+				player.react(PacmanEntity.NORTH);
+			}
+		});
+		upArrowListener.addComponent(upArrowPressed);
+		entityManager.addEntity(stateID, upArrowListener);
+
+		// down arrow key listener
+		Entity downArrowListener = new Entity("DownListener");
+		OREvent downArrowPressed = new OREvent(
+				new KeyDownEvent(Input.KEY_DOWN), new NotInSquareDownEvent(
+						player));
+		downArrowPressed.addAction(new Action() {
+
+			@Override
+			public void update(GameContainer gc, StateBasedGame sb, int delta,
+					Component event) {
+				player.react(PacmanEntity.SOUTH);
+			}
+		});
+		downArrowListener.addComponent(downArrowPressed);
+		entityManager.addEntity(stateID, downArrowListener);
 	}
 
 	@Override

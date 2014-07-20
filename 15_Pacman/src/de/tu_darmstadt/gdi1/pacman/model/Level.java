@@ -1,4 +1,4 @@
-package de.tu_darmstadt.gdi1.pacman.parser;
+package de.tu_darmstadt.gdi1.pacman.model;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
